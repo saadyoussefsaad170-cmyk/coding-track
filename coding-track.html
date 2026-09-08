@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مضمار البرمجة</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Tajawal:wght@400;500;700&display=swap');
+
+:root{
+  --bg:#0B0E14;
+  --panel:#12161F;
+  --panel-alt:#181D29;
+  --line:#252B3A;
+  --text:#DCE1EA;
+  --muted:#7C8699;
+  --cyan:#4FD1C5;
+  --amber:#F2B84B;
+  --rose:#F2617A;
+  --green:#7FD99A;
+  --radius:8px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg);}
+body{
+  font-family:'Tajawal','Space Grotesk',system-ui,sans-serif;
+  color:var(--text);
+  min-height:100vh;
+  padding:28px 16px 60px;
+  background-image:
+    radial-gradient(circle at 15% 0%, rgba(79,209,197,0.07), transparent 40%),
+    radial-gradient(circle at 90% 10%, rgba(242,184,75,0.05), transparent 35%);
+}
+.wrap{max-width:760px;margin:0 auto;}
+.mono{font-family:'JetBrains Mono',monospace;}
+
+/* ===== Header ===== */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px;flex-wrap:wrap;gap:10px;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-mark{
+  width:34px;height:34px;border-radius:7px;
+  background:linear-gradient(135deg,var(--cyan),#2C8C82);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-weight:700;color:#04231F;font-size:16px;
+  flex-shrink:0;
+}
+.brand-name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:19px;letter-spacing:0.2px;}
+.stats{display:flex;gap:14px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted);}
+.stats b{color:var(--text);font-weight:600;}
+
+/* ===== Track (hero) ===== */
+.track-card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:22px 18px 18px;
+  margin-bottom:22px;
+}
+.track-title{font-size:13px;color:var(--muted);margin:0 0 18px;}
+.track-rail{position:relative;display:flex;justify-content:space-between;align-items:flex-start;padding:0 6px;}
+.track-rail::before{
+  content:'';position:absolute;top:15px;right:6%;left:6%;height:2px;
+  background:var(--line);z-index:0;
+}
+.track-fill{
+  content:'';position:absolute;top:15px;right:6%;height:2px;
+  background:linear-gradient(90deg,var(--cyan),var(--green));z-index:1;
+  transition:width .5s ease;
+}
+.node{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;cursor:default;}
+.node.clickable{cursor:pointer;}
+.node-dot{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--panel-alt);border:2px solid var(--line);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--muted);
+  transition:all .2s ease;
+}
+.node.done .node-dot{background:var(--green);border-color:var(--green);color:#0B1F13;}
+.node.current .node-dot{background:var(--bg);border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 0 4px rgba(79,209,197,0.15);}
+.node.locked .node-dot{opacity:.5;}
+.node-label{font-size:12px;color:var(--muted);text-align:center;max-width:74px;}
+.node.current .node-label{color:var(--text);font-weight:500;}
+
+/* ===== Home screen ===== */
+.home-card{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:14px;
+}
+.home-card.locked{opacity:.5;}
+.home-left{display:flex;flex-direction:column;gap:4px;}
+.home-level-name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;}
+.home-level-desc{font-size:13px;color:var(--muted);}
+.home-score{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);}
+.btn{
+  border:none;border-radius:6px;padding:10px 18px;font-family:'Tajawal',sans-serif;font-weight:700;
+  font-size:14px;cursor:pointer;transition:transform .1s ease, filter .15s ease;
+}
+.btn:active{transform:scale(0.97);}
+.btn-primary{background:var(--cyan);color:#04231F;}
+.btn-primary:hover{filter:brightness(1.08);}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line);}
+.btn-ghost:hover{color:var(--text);border-color:var(--muted);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* ===== Quiz screen ===== */
+.quiz-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.q-progress{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);}
+.timer-wrap{display:flex;align-items:center;gap:8px;}
+.timer-num{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);width:34px;}
+.timer-bar{width:70px;height:5px;background:var(--line);border-radius:3px;overflow:hidden;}
+.timer-fill{height:100%;background:var(--cyan);width:100%;transition:width 1s linear, background .3s ease;}
+
+.q-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:16px;}
+.q-prompt{font-size:15px;line-height:1.7;margin:0 0 14px;}
+
+.code-panel{
+  direction:ltr;text-align:left;
+  background:var(--panel-alt);border:1px solid var(--line);border-radius:6px;
+  padding:12px 0;margin-bottom:16px;font-family:'JetBrains Mono',monospace;font-size:13px;
+  overflow-x:auto;
+}
+.code-line{display:flex;padding:1px 14px;white-space:pre;}
+.code-line .ln{color:#3A4356;width:22px;flex-shrink:0;user-select:none;text-align:right;margin-left:14px;}
+.tok-kw{color:var(--cyan);}
+.tok-str{color:var(--green);}
+.tok-num{color:var(--amber);}
+.tok-com{color:#5B6478;}
+
+.options{display:flex;flex-direction:column;gap:8px;}
+.option{
+  background:var(--panel-alt);border:1px solid var(--line);border-radius:6px;
+  padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:13.5px;text-align:right;
+  cursor:pointer;transition:border-color .15s ease, background .15s ease;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.option:hover{border-color:var(--muted);}
+.option.selected{border-color:var(--cyan);background:rgba(79,209,197,0.08);}
+.option.correct{border-color:var(--green);background:rgba(127,217,154,0.1);color:var(--green);}
+.option.wrong{border-color:var(--rose);background:rgba(242,97,122,0.1);color:var(--rose);}
+.option.disabled{cursor:default;}
+.option-mark{font-size:12px;}
+
+.explain{
+  margin-top:14px;padding:12px 14px;border-radius:6px;font-size:13.5px;line-height:1.6;
+  background:var(--panel-alt);border-right:3px solid var(--cyan);display:none;
+}
+.explain.show{display:block;}
+
+.q-actions{display:flex;justify-content:flex-start;}
+
+/* ===== Result screen ===== */
+.result-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:32px 24px;text-align:center;}
+.result-score{font-family:'JetBrains Mono',monospace;font-size:44px;font-weight:600;margin:6px 0 2px;}
+.result-score.pass{color:var(--green);}
+.result-score.fail{color:var(--rose);}
+.result-label{color:var(--muted);font-size:13px;margin-bottom:22px;}
+.result-msg{font-size:15px;margin-bottom:24px;line-height:1.6;}
+.result-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+
+.foot-note{text-align:center;color:var(--muted);font-size:11.5px;margin-top:30px;}
+
+@media (max-width:480px){
+  .node-label{font-size:10.5px;max-width:56px;}
+  .home-card{flex-direction:column;align-items:flex-start;}
+}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+/* ---------------- Content ---------------- */
+const LEVELS = [
+  {
+    id: 0,
+    name: "المبتدئ",
+    desc: "أساسيات المتغيرات والأنواع",
+    questions: [
+      {
+        prompt: "ما الذي تُرجعه العبارة التالية؟",
+        code: `typeof "5"`,
+        options: ["string", "number", "boolean", "undefined"],
+        correct: 0,
+        explain: `القيمة "5" محاطة بعلامتي اقتباس، لذا فهي نص (string) حتى لو كانت تحتوي على رقم.`
+      },
+      {
+        prompt: "ما ناتج الكود التالي بعد تنفيذه؟",
+        code: `let x = 5;\nx = x + 1;\nconsole.log(x);`,
+        options: ["5", "6", '"51"', "خطأ"],
+        correct: 1,
+        explain: `العملية x + 1 هي جمع رقمي عادي، فتصبح قيمة x تساوي 6.`
+      },
+      {
+        prompt: "أي طريقة تصريح صحيحة لمتغيّر لا يمكن إعادة تعيين قيمته؟",
+        code: null,
+        options: ["var x = 5;", "let x = 5;", "const x = 5;", "static x = 5;"],
+        correct: 2,
+        explain: `const تُستخدم لتعريف ثابت لا يمكن إعادة إسناد قيمة جديدة له بعد التصريح.`
+      },
+      {
+        prompt: "ما ناتج الكود التالي؟",
+        code: `console.log(2 + "2");`,
+        options: ['"4"', "4", '"22"', "NaN"],
+        correct: 2,
+        explain: `عند جمع رقم مع نص، تقوم جافاسكريبت بتحويل الرقم إلى نص ودمجهما، فتكون النتيجة "22".`
+      },
+      {
+        prompt: "أي حلقة تكرارية تُنفَّذ مرة واحدة على الأقل حتى لو كان الشرط خاطئًا من البداية؟",
+        code: null,
+        options: ["for", "while", "do...while", "forEach"],
+        correct: 2,
+        explain: `حلقة do...while تُنفّذ جسم الحلقة أولًا ثم تتحقق من الشرط، لذلك تعمل مرة واحدة على الأقل دائمًا.`
+      }
+    ]
+  },
+  {
+    id: 1,
+    name: "المتوسط",
+    desc: "الدوال والتحكم في التدفق",
+    questions: [
+      {
+        prompt: "ما ناتج استدعاء الدالة التالية؟",
+        code: `function greet(name) {\n  console.log("Hi " + name);\n}\nlet result = greet("سارة");\nconsole.log(result);`,
+        options: ['"Hi سارة"', "undefined", "null", "خطأ"],
+        correct: 1,
+        explain: `الدالة greet لا تحتوي على return، لذا فهي تُرجع undefined افتراضيًا رغم أنها تطبع رسالة.`
+      },
+      {
+        prompt: "أي من الدالتين تُرجع مصفوفة جديدة بدلًا من مجرد المرور على العناصر؟",
+        code: null,
+        options: ["forEach", "map", "for", "while"],
+        correct: 1,
+        explain: `map تُنشئ وتُرجع مصفوفة جديدة نتيجة تطبيق دالة على كل عنصر، بينما forEach لا تُرجع شيئًا.`
+      },
+      {
+        prompt: "ما الذي يطبعه الكود التالي بالترتيب؟",
+        code: `for (let i = 0; i < 3; i++) {\n  console.log(i);\n}`,
+        options: ["1 2 3", "0 1 2", "0 1 2 3", "3 2 1"],
+        correct: 1,
+        explain: `تبدأ i من 0 وتستمر طالما i أصغر من 3، فتُطبع القيم 0 ثم 1 ثم 2.`
+      },
+      {
+        prompt: "ما الفرق الأساسي بين === و == في جافاسكريبت؟",
+        code: null,
+        options: [
+          "لا فرق بينهما إطلاقًا",
+          "=== يقارن القيمة فقط",
+          "=== يقارن القيمة والنوع معًا",
+          "== أسرع في التنفيذ"
+        ],
+        correct: 2,
+        explain: `عامل === يتحقق من تطابق القيمة والنوع معًا، بينما == يحوّل الأنواع أولًا قبل المقارنة.`
+      },
+      {
+        prompt: "ما ناتج استدعاء الدالة التعاودية (recursive) التالية؟",
+        code: `function factorial(n) {\n  if (n <= 1) return 1;\n  return n * factorial(n - 1);\n}\nconsole.log(factorial(4));`,
+        options: ["4", "10", "24", "12"],
+        correct: 2,
+        explain: `factorial(4) = 4×3×2×1 = 24، وهذا هو المبدأ الأساسي للدوال التعاودية في حساب المضروب.`
+      }
+    ]
+  },
+  {
+    id: 2,
+    name: "المتقدم",
+    desc: "هياكل البيانات والتعقيد الزمني",
+    questions: [
+      {
+        prompt: "ما التعقيد الزمني للبحث الثنائي (Binary Search) في مصفوفة مرتّبة؟",
+        code: null,
+        options: ["O(n)", "O(log n)", "O(n²)", "O(1)"],
+        correct: 1,
+        explain: `البحث الثنائي يقسّم نطاق البحث إلى نصفين في كل خطوة، لذا يستغرق زمنًا يتناسب مع لوغاريتم حجم المدخل.`
+      },
+      {
+        prompt: "أي هيكل بيانات يعتمد على مبدأ LIFO (آخر داخل، أول خارج)؟",
+        code: null,
+        options: ["Queue (طابور)", "Stack (مكدّس)", "Linked List", "Tree"],
+        correct: 1,
+        explain: `المكدّس (Stack) يسمح بإضافة وحذف العناصر من الأعلى فقط، فآخر عنصر يُضاف هو أول عنصر يُحذف.`
+      },
+      {
+        prompt: "ما ناتج الكود التالي الذي يستخدم إغلاقًا (closure)؟",
+        code: `function counter() {\n  let count = 0;\n  return function () {\n    count++;\n    return count;\n  };\n}\nconst c = counter();\nconsole.log(c());\nconsole.log(c());`,
+        options: ["1 ثم 1", "0 ثم 1", "1 ثم 2", "خطأ"],
+        correct: 2,
+        explain: `الدالة الداخلية تحتفظ بمرجع للمتغيّر count عبر الإغلاق، فتزداد قيمته مع كل استدعاء: أولًا 1 ثم 2.`
+      },
+      {
+        prompt: "ما وظيفة الدالة JSON.stringify()؟",
+        code: null,
+        options: [
+          "تحويل نص JSON إلى كائن جافاسكريبت",
+          "تحويل كائن جافاسكريبت إلى نص JSON",
+          "حذف كائن من الذاكرة",
+          "مقارنة كائنين"
+        ],
+        correct: 1,
+        explain: `JSON.stringify تأخذ كائنًا أو مصفوفة في جافاسكريبت وتحوّلها إلى نص بصيغة JSON، والعملية العكسية تتم عبر JSON.parse.`
+      },
+      {
+        prompt: "ما التعقيد الزمني التقريبي لحلقتين متداخلتين تمران كلتاهما على نفس المصفوفة ذات الحجم n؟",
+        code: null,
+        options: ["O(n)", "O(log n)", "O(n²)", "O(2n)"],
+        correct: 2,
+        explain: `كل عنصر في الحلقة الخارجية يُقابله مرور كامل على الحلقة الداخلية ذات الحجم n، فيكون الإجمالي n×n أي O(n²).`
+      }
+    ]
+  }
+];
+
+const PASS_RATIO = 0.7;
+const QUESTION_TIME = 30;
+const STORAGE_KEY = "coding-track-progress-v1";
+
+let progress = { unlockedLevel: 0, bestScores: {} };
+let view = { screen: "loading" };
+let quizState = null;
+let timerInterval = null;
+
+/* ---------------- Storage ---------------- */
+async function loadProgress() {
+  try {
+    const res = await window.storage.get(STORAGE_KEY, false);
+    if (res && res.value) {
+      const parsed = JSON.parse(res.value);
+      progress = Object.assign({ unlockedLevel: 0, bestScores: {} }, parsed);
+    }
+  } catch (e) {
+    // no saved progress yet — start fresh
+  }
+  view.screen = "home";
+  render();
+}
+
+async function saveProgress() {
+  try {
+    await window.storage.set(STORAGE_KEY, JSON.stringify(progress), false);
+  } catch (e) {
+    console.error("تعذّر حفظ التقدّم", e);
+  }
+}
+
+async function resetProgress() {
+  progress = { unlockedLevel: 0, bestScores: {} };
+  try { await window.storage.set(STORAGE_KEY, JSON.stringify(progress), false); } catch(e){}
+  view.screen = "home";
+  render();
+}
+
+/* ---------------- Helpers ---------------- */
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function highlightJS(code){
+  let out = escapeHtml(code);
+  out = out.replace(/(".*?"|'.*?'|`.*?`)/g, m => `<span class="tok-str">${m}</span>`);
+  out = out.replace(/\/\/.*$/gm, m => `<span class="tok-com">${m}</span>`);
+  out = out.replace(/\b(function|return|const|let|var|if|else|for|while|do|new|typeof)\b/g, '<span class="tok-kw">$1</span>');
+  out = out.replace(/\b(\d+)\b/g, '<span class="tok-num">$1</span>');
+  return out;
+}
+function renderCodePanel(code){
+  if (!code) return "";
+  const lines = code.split("\n");
+  const rows = lines.map((l,i) => `<div class="code-line"><span class="ln">${i+1}</span><span>${highlightJS(l)}</span></div>`).join("");
+  return `<div class="code-panel">${rows}</div>`;
+}
+function totalStars(){
+  return Object.values(progress.bestScores).reduce((a,b)=>a+b,0);
+}
+
+/* ---------------- Screens ---------------- */
+function renderTrackRail(activeLevel){
+  const n = LEVELS.length;
+  const fillPct = n <= 1 ? 0 : (Math.min(progress.unlockedLevel, n-1) / (n-1)) * 88;
+  let nodes = "";
+  LEVELS.forEach((lvl, i) => {
+    let cls = "node";
+    if (i < progress.unlockedLevel) cls += " done";
+    else if (i === progress.unlockedLevel) cls += " current";
+    else cls += " locked";
+    const icon = i < progress.unlockedLevel ? "✓" : (i+1);
+    nodes += `<div class="${cls}"><div class="node-dot">${icon}</div><div class="node-label">${lvl.name}</div></div>`;
+  });
+  return `
+  <div class="track-card">
+    <p class="track-title">مسارك عبر المستويات</p>
+    <div class="track-rail">
+      <div class="track-fill" style="width:${fillPct}%"></div>
+      ${nodes}
+    </div>
+  </div>`;
+}
+
+function renderHome(){
+  let cards = "";
+  LEVELS.forEach((lvl, i) => {
+    const locked = i > progress.unlockedLevel;
+    const done = i < progress.unlockedLevel;
+    const best = progress.bestScores[i];
+    const scoreText = best !== undefined ? `أفضل نتيجة: ${best}/${lvl.questions.length}` : "لم تُحَل بعد";
+    cards += `
+    <div class="home-card ${locked ? 'locked' : ''}">
+      <div class="home-left">
+        <div class="home-level-name">${lvl.name}${done ? " ✓" : ""}</div>
+        <div class="home-level-desc">${lvl.desc} · ${lvl.questions.length} أسئلة</div>
+        <div class="home-score">${locked ? "مقفل — أكمل المستوى السابق أولًا" : scoreText}</div>
+      </div>
+      <button class="btn btn-primary" ${locked ? "disabled" : ""} onclick="startLevel(${i})">
+        ${done ? "إعادة المحاولة" : "ابدأ"}
+      </button>
+    </div>`;
+  });
+
+  return `
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">&lt;/&gt;</div>
+        <div class="brand-name">مضمار البرمجة</div>
+      </div>
+      <div class="stats">مجموع النقاط <b>${totalStars()}</b></div>
+    </div>
+    ${renderTrackRail()}
+    ${cards}
+    <div style="text-align:center;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="confirmReset()">تصفير التقدّم</button>
+    </div>
+    <p class="foot-note">أكمل ٪70 على الأقل من كل مستوى لفتح ما بعده</p>
+  `;
+}
+
+function startLevel(levelIndex){
+  quizState = {
+    levelIndex,
+    qIndex: 0,
+    answers: [],
+    selected: null,
+    locked: false,
+    timeLeft: QUESTION_TIME
+  };
+  view.screen = "quiz";
+  render();
+  startTimer();
+}
+
+function startTimer(){
+  clearInterval(timerInterval);
+  if (!quizState) return;
+  quizState.timeLeft = QUESTION_TIME;
+  updateTimerDOM();
+  timerInterval = setInterval(() => {
+    if (!quizState || quizState.locked) return;
+    quizState.timeLeft -= 1;
+    if (quizState.timeLeft <= 0) {
+      clearInterval(timerInterval);
+      selectAnswer(-1); // time's up, count as unanswered/wrong
+    } else {
+      updateTimerDOM();
+    }
+  }, 1000);
+}
+
+function updateTimerDOM(){
+  const bar = document.getElementById("timerFill");
+  const num = document.getElementById("timerNum");
+  if (!bar || !num || !quizState) return;
+  const pct = (quizState.timeLeft / QUESTION_TIME) * 100;
+  bar.style.width = pct + "%";
+  bar.style.background = pct < 25 ? "var(--rose)" : (pct < 55 ? "var(--amber)" : "var(--cyan)");
+  num.textContent = quizState.timeLeft + "ث";
+}
+
+function renderQuiz(){
+  const lvl = LEVELS[quizState.levelIndex];
+  const q = lvl.questions[quizState.qIndex];
+  const total = lvl.questions.length;
+
+  let optionsHtml = "";
+  q.options.forEach((opt, i) => {
+    let cls = "option";
+    if (quizState.locked) {
+      cls += " disabled";
+      if (i === q.correct) cls += " correct";
+      else if (i === quizState.selected) cls += " wrong";
+    } else if (quizState.selected === i) {
+      cls += " selected";
+    }
+    let mark = "";
+    if (quizState.locked && i === q.correct) mark = "✓";
+    else if (quizState.locked && i === quizState.selected) mark = "✕";
+    optionsHtml += `<div class="${cls}" onclick="${quizState.locked ? '' : `selectAnswer(${i})`}">
+      <span>${escapeHtml(opt)}</span><span class="option-mark">${mark}</span>
+    </div>`;
+  });
+
+  const explainHtml = quizState.locked
+    ? `<div class="explain show">${q.explain}</div>`
+    : `<div class="explain"></div>`;
+
+  const actionLabel = quizState.qIndex === total - 1 ? "عرض النتيجة" : "السؤال التالي";
+  const actionsHtml = quizState.locked
+    ? `<div class="q-actions"><button class="btn btn-primary" onclick="nextQuestion()">${actionLabel}</button></div>`
+    : "";
+
+  return `
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">&lt;/&gt;</div>
+        <div class="brand-name">${lvl.name}</div>
+      </div>
+      <button class="btn btn-ghost" onclick="exitQuiz()">خروج</button>
+    </div>
+    <div class="quiz-head">
+      <span class="q-progress">السؤال ${quizState.qIndex + 1} من ${total}</span>
+      <div class="timer-wrap">
+        <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+        <span class="timer-num" id="timerNum">${QUESTION_TIME}ث</span>
+      </div>
+    </div>
+    <div class="q-card">
+      <p class="q-prompt">${q.prompt}</p>
+      ${renderCodePanel(q.code)}
+      <div class="options">${optionsHtml}</div>
+      ${explainHtml}
+    </div>
+    ${actionsHtml}
+  `;
+}
+
+function selectAnswer(i){
+  if (!quizState || quizState.locked) return;
+  clearInterval(timerInterval);
+  quizState.selected = i;
+  quizState.locked = true;
+  quizState.answers.push(i);
+  render();
+}
+
+function nextQuestion(){
+  const lvl = LEVELS[quizState.levelIndex];
+  if (quizState.qIndex < lvl.questions.length - 1) {
+    quizState.qIndex += 1;
+    quizState.selected = null;
+    quizState.locked = false;
+    render();
+    startTimer();
+  } else {
+    finishLevel();
+  }
+}
+
+function finishLevel(){
+  clearInterval(timerInterval);
+  const lvl = LEVELS[quizState.levelIndex];
+  let score = 0;
+  quizState.answers.forEach((ans, i) => { if (ans === lvl.questions[i].correct) score++; });
+
+  const prevBest = progress.bestScores[quizState.levelIndex] || 0;
+  if (score > prevBest) progress.bestScores[quizState.levelIndex] = score;
+
+  const passed = score / lvl.questions.length >= PASS_RATIO;
+  if (passed && progress.unlockedLevel === quizState.levelIndex) {
+    progress.unlockedLevel = Math.min(quizState.levelIndex + 1, LEVELS.length);
+  }
+  saveProgress();
+
+  view.screen = "result";
+  view.result = { score, total: lvl.questions.length, passed, levelIndex: quizState.levelIndex };
+  render();
+}
+
+function renderResult(){
+  const { score, total, passed, levelIndex } = view.result;
+  const lvl = LEVELS[levelIndex];
+  const isLast = levelIndex === LEVELS.length - 1;
+  const msg = passed
+    ? (isLast
+        ? "أحسنت! أكملت جميع المستويات المتاحة حاليًا."
+        : `اجتزت مستوى «${lvl.name}» وفُتح المستوى التالي.`)
+    : `تحتاج إلى ٪${Math.round(PASS_RATIO*100)} على الأقل من الإجابات الصحيحة لاجتياز هذا المستوى. حاول مرة أخرى.`;
+
+  let nextBtn = "";
+  if (passed && !isLast) {
+    nextBtn = `<button class="btn btn-primary" onclick="startLevel(${levelIndex+1})">المستوى التالي</button>`;
+  } else {
+    nextBtn = `<button class="btn btn-primary" onclick="startLevel(${levelIndex})">إعادة المحاولة</button>`;
+  }
+
+  return `
+    <div class="result-card">
+      <div class="result-score ${passed ? 'pass' : 'fail'}">${score}/${total}</div>
+      <div class="result-label">نتيجتك في مستوى «${lvl.name}»</div>
+      <p class="result-msg">${msg}</p>
+      <div class="result-actions">
+        ${nextBtn}
+        <button class="btn btn-ghost" onclick="goHome()">العودة إلى المسار</button>
+      </div>
+    </div>
+  `;
+}
+
+function exitQuiz(){
+  clearInterval(timerInterval);
+  quizState = null;
+  goHome();
+}
+function goHome(){
+  view.screen = "home";
+  render();
+}
+function confirmReset(){
+  if (confirm("هل تريد تصفير كل تقدّمك؟ لا يمكن التراجع عن هذا الإجراء.")) {
+    resetProgress();
+  }
+}
+
+/* ---------------- Render dispatcher ---------------- */
+function render(){
+  const app = document.getElementById("app");
+  if (view.screen === "loading") {
+    app.innerHTML = `<div style="text-align:center;padding:80px 0;color:var(--muted);font-family:'JetBrains Mono',monospace;">جارٍ تحميل تقدّمك...</div>`;
+  } else if (view.screen === "home") {
+    app.innerHTML = renderHome();
+  } else if (view.screen === "quiz") {
+    app.innerHTML = renderQuiz();
+    updateTimerDOM();
+  } else if (view.screen === "result") {
+    app.innerHTML = renderResult();
+  }
+}
+
+loadProgress();
+</script>
+</body>
+</html>
